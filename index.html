@@ -27,6 +27,8 @@
       <h1 class="title">Grand Prix<br>d'anniversaire</h1>
       <p class="pilot">Pilote : <strong id="intro-name"></strong></p>
       <p class="lead" id="intro-text"></p>
+      <p class="kicker">À gagner</p>
+      <div class="intro-cars" id="intro-cars"></div>
       <button class="btn" id="btn-start">Feu vert !</button>
     </section>
 
@@ -37,6 +39,7 @@
           <span class="card-num">Carte 1</span>
           <h2>Grille de départ</h2>
           <p>Gratte les 9 cases. <strong>3 symboles identiques</strong> = tu gagnes une F1.</p>
+          <div class="odds" id="odds-c1"></div>
         </div>
         <div class="grid9" id="grid9"></div>
       </div>
@@ -49,7 +52,8 @@
         <div class="card-head">
           <span class="card-num">Carte 2</span>
           <h2>Jackpot du paddock</h2>
-          <p>Tire le levier pour arrêter les rouleaux. <strong>3 logos identiques</strong> = une F1. Et il paraît qu'un cadeau légendaire se cache ici...</p>
+          <p>Tire le levier pour arrêter les rouleaux. <strong>3 logos identiques</strong> = une F1. Et 3 chats = le cadeau légendaire...</p>
+          <div class="odds" id="odds-c2"></div>
         </div>
         <div class="slot-wrap">
           <div class="slot" id="slot">
@@ -75,6 +79,7 @@
           <span class="card-num">Carte 3</span>
           <div class="goal-title">GOAL<span>!</span></div>
           <div class="goal-sub">Gagne jusqu'à <strong>1 F1 Lego</strong></div>
+          <div class="odds" id="odds-c3"></div>
           <div class="ball-field" id="balls">
             <div class="gain-label">GAIN</div>
             <div class="gain-box" id="goal-prize"></div>

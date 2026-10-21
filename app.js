@@ -14,7 +14,7 @@
   const buzz = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
 
   const CAR = "🏎️";
-  const CAT = "🐈";
+  const CAT = "🐱";
   const SYMBOLS = [CAR, "🏆", "🏁", "🚦", "🔧", "⛽"];
   const REEL_SYMBOLS = [CAR, "🏆", "🏁", "🚦", "⏱️", CAT];
 
@@ -35,7 +35,7 @@
   function draw() {
     const c1 = Math.random() < C.chanceF1;
     const r = Math.random();
-    const c2 = r < C.chanceLitiere ? "litiere" : Math.random() < C.chanceF1 ? "f1" : "perdu";
+    const c2 = r < C.chanceLitiere ? "litiere" : r < C.chanceLitiere + C.chanceF1 ? "f1" : "perdu";
     const c3 = Math.random() < C.chanceF1;
 
     // Carte 1 : 9 cases. Gagné = 3 voitures ; perdu = aucun symbole 3 fois.
@@ -270,6 +270,13 @@
   $("#intro-name").textContent = C.prenom;
   $("#intro-date").textContent = C.date;
   $("#intro-text").textContent = C.blagues.accueil;
+  $("#intro-cars").innerHTML = C.f1.map((c) => `<figure style="--c:${c.couleur}">${c.image ? `<img src="${c.image}" alt="">` : CAR}<figcaption>${c.nom}</figcaption></figure>`).join("");
+
+  // Pourcentage de chance affiché sur chaque carte
+  const pct = (x) => `${Math.round(x * 100)} %`;
+  $("#odds-c1").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b>`;
+  $("#odds-c2").innerHTML = `F1 : <b>${pct(C.chanceF1)}</b> · <span class="cat-logo">${CAT}</span> Litière : <b>${pct(C.chanceLitiere)}</b>`;
+  $("#odds-c3").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b>`;
   $("#btn-start").addEventListener("click", (e) => {
     const btn = e.currentTarget;
     btn.disabled = true;
@@ -325,7 +332,7 @@
     const state = reels.map((reel, i) => {
       const strip = $(".strip", reel);
       const seq = shuffle(REEL_SYMBOLS);
-      strip.innerHTML = seq.concat(seq).map((s) => `<div>${s}</div>`).join("");
+      strip.innerHTML = seq.concat(seq).map((s) => (s === CAT ? `<div><span class="cat-reel">${s}</span></div>` : `<div>${s}</div>`)).join("");
       return { reel, strip, seq, p: Math.random() * 1000, v: 0.9 + i * 0.15, stopping: null, stopped: false };
     });
     const H = () => reels[0].offsetHeight;
@@ -526,7 +533,7 @@
       prizes = C.f1.map((car, i) => {
         if (!won[i]) return "";
         const how = S.res[keys[i]] === true || S.res[keys[i]] === "f1" ? `Gagnée sur la carte ${i + 1}` : "Débloquée grâce au muscle";
-        return `<div class="prize-card" style="--c:${car.couleur}"><span class="ico">${CAR}</span>
+        return `<div class="prize-card" style="--c:${car.couleur}">${car.image ? "" : `<span class="ico">${CAR}</span>`}
           <div><b>${car.nom}</b><small>${car.equipe} · ${how}</small></div>
           ${car.image ? `<img src="${car.image}" alt="">` : ""}</div>`;
       }).join("");

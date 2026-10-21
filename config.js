@@ -4,17 +4,17 @@
 // =====================================================================
 window.CONFIG = {
   // Prénom du pilote (le héros du jour)
-  prenom: "Champion",
+  prenom: "Nathan",
 
   // Date affichée sur l'écran d'accueil (texte libre)
-  date: "Grand Prix du jour",
+  date: "Grand Prix du 22 octobre",
 
   // Les 3 F1 Lego à gagner : une par carte (carte 1, carte 2, carte 3).
   // "image" est facultatif : mets un chemin comme "images/ferrari.jpg".
   f1: [
-    { nom: "F1 Lego n°1", equipe: "Écurie mystère", couleur: "#e10600", image: "" },
-    { nom: "F1 Lego n°2", equipe: "Écurie mystère", couleur: "#00a19c", image: "" },
-    { nom: "F1 Lego n°3", equipe: "Écurie mystère", couleur: "#ff8000", image: "" },
+    { nom: "Ferrari SF-24", equipe: "Scuderia Ferrari", couleur: "#e10600", image: "images/ferrari.png" },
+    { nom: "Red Bull RB20", equipe: "Oracle Red Bull Racing", couleur: "#3671c6", image: "images/redbull.png" },
+    { nom: "Alpine A524", equipe: "BWT Alpine F1 Team", couleur: "#ff87bc", image: "images/alpine.jpg" },
   ],
 
   // Le meilleur cadeau, caché dans la carte Jackpot
@@ -50,6 +50,6 @@ window.CONFIG = {
       "Pole position et victoire. Masterclass.",
       "Doublé historique ! Enfin, simple. Mais historique.",
     ],
-    finale: "Joyeux anniversaire ! Que ton année soit aussi rapide qu'un tour de qualif.",
+    finale: "Joyeux anniversaire Nathan ! Que ton année soit aussi rapide qu'un tour de qualif.",
   },
 };
