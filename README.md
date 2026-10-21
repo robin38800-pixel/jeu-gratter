@@ -6,3 +6,4 @@ Site statique (HTML/CSS/JS, aucune dépendance). Ouvre `index.html` ou publie av
 - Les images éventuelles vont dans `images/` (ex. `image: "images/ferrari.jpg"`).
 - Le tirage est fait une fois puis gardé sur le téléphone (recharger la page ne relance pas les cartes).
 - Pour rejouer pendant les tests : ajoute `?reset` à l'adresse.
+- Après une modification, augmente le numéro `?v=` dans `index.html` (style.css, config.js, app.js) pour que les téléphones ne gardent pas l'ancienne version en cache.

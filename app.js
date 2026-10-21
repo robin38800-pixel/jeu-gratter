@@ -633,37 +633,21 @@
   function initEnd() {
     const won = wonF1();
     const litiere = hasLitiere();
-    const n = won.filter(Boolean).length;
-    const rows = [
-      { pos: "P1", who: C.prenom, sub: litiere ? "Champion du monde de la propreté féline" : `${n} F1 au garage`, pts: litiere ? 500 : 25 * 3 + 26, c: "#ffd23f", me: true },
-      { pos: "P2", who: "Max Verstappen", sub: "Pas invité", pts: 100, c: "#3671c6" },
-      { pos: "P3", who: "Lewis Hamilton", sub: "Toujours en train de chercher le muscle", pts: 77, c: "#e10600" },
-      { pos: "P4", who: litiere ? "Le chat" : "Les F1 que tu n'as pas eues", sub: litiere ? "Enfin des toilettes dignes de lui" : "Il n'y en a pas, bien joué", pts: litiere ? 499 : 0, c: "#888" },
-    ];
+    let gifts;
     if (litiere) {
-      [rows[1], rows[3]] = [rows[3], rows[1]];
-      rows.forEach((r, i) => (r.pos = "P" + (i + 1)));
-    }
-    $("#standings").innerHTML = rows.map((r, i) => `
-      <li class="${r.me ? "me" : ""}" style="animation-delay:${i * 0.15}s">
-        <span class="pos">${r.pos}</span><span class="bar" style="background:${r.c}"></span>
-        <span class="who">${r.who}<small>${r.sub}</small></span><span class="pts">${r.pts} pts</span>
-      </li>`).join("");
-
-    let prizes;
-    if (litiere) {
-      prizes = `<div class="prize-card" style="--c:#c084fc"><span class="ico">${CAT}</span>
-        <div><b>${C.litiere.nom}</b><small>Jackpot légendaire (5 % de chance !)</small></div></div>`;
+      gifts = [{ ico: CAT, nom: C.litiere.nom, sub: "Jackpot légendaire (5 % de chance !)", c: "#c084fc" }];
     } else {
-      prizes = C.f1.map((car, i) => {
-        if (!won[i]) return "";
-        const how = cardWon(CARDS[i]) ? `Gagnée au jeu ${i + 1}` : "Débloquée grâce au muscle";
-        return `<div class="prize-card" style="--c:${car.couleur}">${car.image ? "" : `<span class="ico">${CAR}</span>`}
-          <div><b>${car.nom}</b><small>${car.equipe} · ${how}</small></div>
-          ${car.image ? `<img src="${car.image}" alt="">` : ""}</div>`;
-      }).join("");
+      gifts = C.f1.map((car, i) => won[i] && {
+        img: car.image, nom: car.nom, c: car.couleur,
+        sub: `${car.equipe} · ${cardWon(CARDS[i]) ? `gagnée au jeu ${i + 1}` : "débloquée grâce au muscle"}`,
+      }).filter(Boolean);
     }
-    $("#prizes").innerHTML = prizes;
+    $("#gift-count").textContent = gifts.length > 1 ? `${gifts.length} cadeaux gagnés` : "1 cadeau gagné";
+    $("#prizes").innerHTML = gifts.map((g, i) => `
+      <div class="gift" style="--c:${g.c};animation-delay:${i * 0.2}s">
+        <div class="gift-pic">${g.img ? `<img src="${g.img}" alt="">` : `<span>${g.ico || CAR}</span>`}</div>
+        <div class="gift-txt"><b>${g.nom}</b><small>${g.sub}</small></div>
+      </div>`).join("");
     $("#end-text").textContent = C.blagues.finale;
     setTimeout(() => confetti(500), 300);
   }

@@ -351,29 +351,21 @@ main { max-width: 460px; margin: 0 auto; padding: 16px 16px 48px; }
   animation: pulse 1.4s ease infinite;
 }
 
-.standings { list-style: none; padding: 0; margin: 20px 0; border-radius: 16px; overflow: hidden; border: 3px solid var(--gold-dark); }
-.standings li {
-  display: grid; grid-template-columns: 44px 6px 1fr auto; align-items: center; gap: 10px;
-  padding: 12px 14px; background: rgba(30, 3, 12, .85); border-bottom: 1px solid var(--line);
-  animation: enter .5s ease both;
+.gift-count { text-align: center; color: var(--muted); font-weight: 900; font-size: 18px; margin: 4px 0 0; }
+.prizes { display: grid; gap: 14px; margin-top: 18px; }
+.gift {
+  background: var(--paper); border-radius: 12px; padding: 8px; animation: enter .6s ease both;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .5);
 }
-.standings li:last-child { border-bottom: 0; }
-.standings li.me { background: linear-gradient(90deg, #7a5200, #2a0410); }
-.standings .pos { font-family: var(--title); font-size: 24px; color: var(--gold); padding-top: 3px; }
-.standings .bar { width: 4px; height: 26px; border-radius: 2px; }
-.standings .who { font-weight: 900; font-size: 17px; line-height: 1.15; }
-.standings .who small { display: block; color: var(--muted); font-weight: 700; font-size: 13px; }
-.standings .pts { font-weight: 900; font-variant-numeric: tabular-nums; }
-
-.prizes { display: grid; gap: 10px; }
-.prize-card {
-  display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px;
-  background: rgba(30, 3, 12, .85); border: 2px solid var(--gold-dark); border-left: 8px solid var(--c, var(--gold));
+.gift-pic {
+  display: grid; place-items: center; background: #fff; border-radius: 8px; padding: 8px;
+  border-bottom: 6px solid var(--c);
 }
-.prize-card .ico { font-size: 30px; }
-.prize-card b { display: block; font-size: 17px; }
-.prize-card small { color: var(--muted); font-weight: 700; }
-.prize-card img { width: 72px; height: 50px; object-fit: contain; background: #fff; padding: 2px; border-radius: 8px; margin-left: auto; }
+.gift-pic img { width: 100%; max-height: 190px; object-fit: contain; }
+.gift-pic span { font-size: 90px; line-height: 1.2; }
+.gift-txt { text-align: center; color: #2b1100; padding: 10px 6px 6px; }
+.gift-txt b { display: block; font-family: var(--title); font-weight: 400; font-size: 26px; text-transform: uppercase; letter-spacing: .02em; }
+.gift-txt small { color: #6b4a3a; font-weight: 800; font-size: 14px; }
 
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
 
