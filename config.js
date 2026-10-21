@@ -39,7 +39,7 @@ window.CONFIG = {
 
   // Petites blagues affichées pendant le jeu (remplace par vos blagues internes)
   blagues: {
-    accueil: "Bienvenue au casino, Nathan ! Trois jeux à gratter, deux parties chacun. Faites vos jeux !",
+    accueil: "Bienvenue au casino, Nathan ! Trois jeux, deux parties chacun et trois tirages au jackpot. Faites vos jeux !",
     perdu: [
       "Crevaison lente. Ça arrive aux meilleurs.",
       "Stratégie pneus douteuse. Le muret des stands s'excuse.",

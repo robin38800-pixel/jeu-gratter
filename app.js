@@ -21,7 +21,7 @@
   // ------------------------------------------------------------------
   //  État (tirage fait une seule fois, gardé si la page est rechargée)
   // ------------------------------------------------------------------
-  const KEY = "gp-anniv-v2";
+  const KEY = "gp-anniv-v3";
   const store = {
     get() { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } },
     set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} },
@@ -33,7 +33,9 @@
   }
 
   const CARDS = ["c1", "c2", "c3"];
-  const PARTIES = 2;
+  // Nombre de parties par jeu (3 tirages au jackpot)
+  const PARTIES = { c1: 2, c2: 3, c3: 2 };
+  const PART_WORD = { c1: "Partie", c2: "Tirage", c3: "Partie" };
 
   function drawPartie(card) {
     const others = SYMBOLS.filter((x) => x !== CAR);
@@ -69,7 +71,7 @@
   function draw() {
     const S = { step: "intro", part: 0, out: {}, lay: {}, res: { c1: [], c2: [], c3: [] }, q: 0, viaQ: [] };
     CARDS.forEach((c) => {
-      const ps = Array.from({ length: PARTIES }, () => drawPartie(c));
+      const ps = Array.from({ length: PARTIES[c] }, () => drawPartie(c));
       S.out[c] = ps.map((x) => x.out);
       S.lay[c] = ps.map((x) => x.lay);
     });
@@ -227,9 +229,9 @@
     STEPS.forEach((s) => { $("#screen-" + s).hidden = s !== step; });
     $("#hud").hidden = step === "intro";
     const labels = { c1: "Jeu 1/3", c2: "Jeu 2/3", c3: "Jeu 3/3", q: "Question bonus", end: "Résultats" };
-    $("#hud-step").textContent = (labels[step] || "") + (CARD_LABEL[step] ? ` · Partie ${part + 1}/${PARTIES}` : "");
+    $("#hud-step").textContent = (labels[step] || "") + (CARD_LABEL[step] ? ` · ${PART_WORD[step]} ${part + 1}/${PARTIES[step]}` : "");
     if (CARD_LABEL[step]) {
-      $(`#screen-${step} .card-num`).textContent = `${CARD_LABEL[step]} · Partie ${part + 1}/${PARTIES}`;
+      $(`#screen-${step} .card-num`).textContent = `${CARD_LABEL[step]} · ${PART_WORD[step]} ${part + 1}/${PARTIES[step]}`;
       $("#res-" + step).hidden = true;
     }
     renderGarage();
@@ -254,7 +256,7 @@
     }
     wonF1().forEach((w, i) => {
       const d = document.createElement("div");
-      const done = S.res[CARDS[i]].length === PARTIES;
+      const done = S.res[CARDS[i]].length === PARTIES[CARDS[i]];
       d.className = "slot-car" + (w ? " won" : done ? " lost" : "");
       d.textContent = w ? CAR : "";
       if (w) d.style.borderColor = C.f1[i].couleur;
@@ -271,7 +273,7 @@
   }
   function nextOf(c) {
     if (hasLitiere()) return ["end", 0];
-    if (S.part + 1 < PARTIES) return [c, S.part + 1];
+    if (S.part + 1 < PARTIES[c]) return [c, S.part + 1];
     if (c === "c1") return ["c2", 0];
     if (c === "c2") return ["c3", 0];
     return [wonF1().every(Boolean) ? "end" : "q", 0];
@@ -301,7 +303,7 @@
       html = `<h3>Perdu...</h3><p>${pick(C.blagues.perdu)}</p>`;
     }
     const [next, part] = nextOf(id);
-    const nextLabel = next === id ? `Partie ${part + 1}` : next === "c2" || next === "c3" ? "Carte suivante" : next === "q" ? "Question bonus" : "Voir le classement";
+    const nextLabel = next === id ? `${PART_WORD[id]} ${part + 1}` : next === "c2" || next === "c3" ? "Carte suivante" : next === "q" ? "Question bonus" : "Voir le classement";
     box.innerHTML = html + `<button class="btn">${nextLabel}</button>`;
     box.hidden = false;
     $("button", box).addEventListener("click", () => show(next, part));
@@ -309,7 +311,59 @@
     if (kind && !already) confetti(kind === "litiere" ? 400 : 180);
     buzz(kind ? [60, 40, 120] : 80);
     renderGarage();
+    if (!kind) maybeMarbella(id);
   }
+
+  // Pop-up « stage à Marbella » : 2 défaites de suite sur un même jeu (une fois par jeu)
+  const GAME_NAME = { c1: "Grille d'Or", c2: "Mega Jackpot", c3: "Goal!" };
+  const isLoss = (v) => v === false || v === "perdu";
+  function maybeMarbella(c) {
+    const p = S.part, r = S.res[c];
+    S.mb = S.mb || {};
+    if (S.mb[c] || p < 1 || !isLoss(r[p]) || !isLoss(r[p - 1]) || cardWon(c)) return;
+    S.mb[c] = true; save();
+    const done = r.filter((v) => v !== undefined).length;
+    setTimeout(() => {
+      document.body.insertAdjacentHTML("beforeend", `
+        <div class="mb-overlay" id="mb"><div class="mb-pop"><div class="mb-in">
+          <div class="mb-stamp">2 défaites</div>
+          <span class="card-num">${GAME_NAME[c]} · 0/${done}</span>
+          <h2 class="t-title"><span class="t3d yellow">Aïe aïe aïe</span></h2>
+          <div class="mb-scene">${MARBELLA_SVG}</div>
+          <p class="mb-msg">Tu es mauvais…<b>Il te faudrait un stage à Marbella !</b></p>
+          <button class="btn">J'ai compris, je continue</button>
+        </div></div></div>`);
+      buzz([100, 60, 100]);
+      $("#mb .btn").addEventListener("click", () => $("#mb").remove());
+    }, 900);
+  }
+  const MARBELLA_SVG = `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="mbsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a3c"/><stop offset=".55" stop-color="#ffd36b"/><stop offset="1" stop-color="#ffe9a8"/></linearGradient>
+        <linearGradient id="mbsea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1fb5d6"/><stop offset="1" stop-color="#0a7aa8"/></linearGradient>
+      </defs>
+      <rect width="360" height="200" fill="url(#mbsky)"/>
+      <circle cx="250" cy="96" r="38" fill="#fff36b"/><circle cx="250" cy="96" r="50" fill="#fff36b" opacity=".25"/>
+      <path d="M0 112 Q60 104 120 112 T240 112 T360 112 V150 H0Z" fill="url(#mbsea)"/>
+      <path d="M0 126 q20-6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#bff2ff" stroke-width="3" fill="none" opacity=".7"/>
+      <path d="M0 150 Q90 132 180 146 T360 140 V200 H0Z" fill="#ffd98a"/>
+      <path d="M172 108 h44 l-8 9 h-30z" fill="#fff"/><path d="M190 108 v-24 l16 24z" fill="#fff"/><rect x="189" y="82" width="2" height="26" fill="#555"/>
+      <path d="M62 196 C66 160 70 128 82 92" stroke="#8a5a2b" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <g fill="#1f9d4a">
+        <path d="M82 92 C60 80 38 84 22 98 C44 90 62 92 82 92Z"/><path d="M82 92 C70 70 52 62 34 64 C54 70 68 78 82 92Z"/>
+        <path d="M82 92 C92 68 110 60 128 62 C110 70 96 78 82 92Z"/><path d="M82 92 C104 84 126 88 140 102 C120 94 100 92 82 92Z"/>
+        <path d="M82 92 C82 70 90 56 100 48 C94 62 88 76 82 92Z"/>
+      </g>
+      <circle cx="80" cy="96" r="5" fill="#7a4a1a"/><circle cx="88" cy="94" r="5" fill="#7a4a1a"/>
+      <path d="M268 190 L282 132" stroke="#555" stroke-width="3"/>
+      <path d="M244 140 Q282 104 320 128 Z" fill="#e0123c"/><path d="M263 134 Q282 112 300 130 Z" fill="#fff"/>
+      <path d="M250 186 l40 -14 l22 14" stroke="#fff" stroke-width="5" fill="none" stroke-linejoin="round"/>
+      <text x="300" y="182" font-size="26">😎</text>
+      <rect x="128" y="150" width="4" height="40" fill="#8a5a2b"/>
+      <rect x="96" y="132" width="88" height="28" rx="5" fill="#fffdf6" stroke="#8a5a2b" stroke-width="3"/>
+      <text x="140" y="151" text-anchor="middle" font-family="Luckiest Guy" font-size="15" fill="#b4258f">MARBELLA</text>
+      <text x="20" y="40" font-size="22">🍹</text><text x="320" y="44" font-size="20">⛱️</text>
+    </svg>`;
 
   // Pièces d'or décoratives autour de chaque ticket
   const COINS = [[-3, 4, 34], [88, 2, 30], [93, 22, 24], [-4, 30, 22], [91, 48, 28], [-5, 60, 30], [94, 74, 22], [-2, 88, 26], [86, 92, 32], [40, -2, 20]];
@@ -332,7 +386,7 @@
   // Pourcentage de chance affiché sur chaque carte
   const pct = (x) => `${Math.round(x * 100)} %`;
   $("#odds-c1").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b> par partie`;
-  $("#odds-c2").innerHTML = `Par partie : F1 <b>${pct(C.chanceF1)}</b> · <span class="cat-logo">${CAT}</span> Litière <b>${pct(C.chanceLitiere)}</b>`;
+  $("#odds-c2").innerHTML = `Par tirage : F1 <b>${pct(C.chanceF1)}</b> · <span class="cat-logo">${CAT}</span> Litière <b>${pct(C.chanceLitiere)}</b>`;
   $("#odds-c3").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b> par partie`;
   $("#btn-start").addEventListener("click", (e) => {
     const btn = e.currentTarget;
