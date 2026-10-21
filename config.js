@@ -7,7 +7,7 @@ window.CONFIG = {
   prenom: "Nathan",
 
   // Date affichée sur l'écran d'accueil (texte libre)
-  date: "Grand Prix du 22 octobre",
+  date: "Soirée du 22 octobre",
 
   // Les 3 F1 Lego à gagner : une par carte (carte 1, carte 2, carte 3).
   // "image" est facultatif : mets un chemin comme "images/ferrari.jpg".
@@ -39,7 +39,7 @@ window.CONFIG = {
 
   // Petites blagues affichées pendant le jeu (remplace par vos blagues internes)
   blagues: {
-    accueil: "Aujourd'hui, c'est toi le pilote. Trois jeux à gratter, deux parties chacun. Boucle ta ceinture.",
+    accueil: "Bienvenue au casino, Nathan ! Trois jeux à gratter, deux parties chacun. Faites vos jeux !",
     perdu: [
       "Crevaison lente. Ça arrive aux meilleurs.",
       "Stratégie pneus douteuse. Le muret des stands s'excuse.",

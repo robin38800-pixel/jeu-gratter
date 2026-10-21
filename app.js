@@ -15,8 +15,8 @@
 
   const CAR = "🏎️";
   const CAT = "🐱";
-  const SYMBOLS = [CAR, "🏆", "🏁", "🚦", "🔧", "⛽"];
-  const REEL_SYMBOLS = [CAR, "🏆", "🏁", "🚦", "⏱️", CAT];
+  const SYMBOLS = [CAR, "🍒", "🔔", "💎", "⭐", "🍀"];
+  const REEL_SYMBOLS = [CAR, "🍒", "🔔", "💎", "🍋", CAT];
 
   // ------------------------------------------------------------------
   //  État (tirage fait une seule fois, gardé si la page est rechargée)
@@ -112,7 +112,7 @@
       }
       if (label) {
         ctx.fillStyle = "rgba(40,40,50,.55)";
-        ctx.font = `900 italic ${Math.round(Math.min(w, h) * 0.22)}px "Titillium Web", sans-serif`;
+        ctx.font = `${Math.round(Math.min(w, h) * 0.24)}px "Luckiest Guy", sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(label, w / 2, h / 2);
@@ -221,12 +221,12 @@
   //  Navigation + HUD
   // ------------------------------------------------------------------
   const STEPS = ["intro", "c1", "c2", "c3", "q", "end"];
-  const CARD_LABEL = { c1: "Carte 1", c2: "Carte 2", c3: "Carte 3" };
+  const CARD_LABEL = { c1: "Jeu 1", c2: "Jeu 2", c3: "Jeu 3" };
   function show(step, part = 0) {
     S.step = step; S.part = part; save();
     STEPS.forEach((s) => { $("#screen-" + s).hidden = s !== step; });
     $("#hud").hidden = step === "intro";
-    const labels = { c1: "Course 1/3", c2: "Course 2/3", c3: "Course 3/3", q: "Question bonus", end: "Arrivée" };
+    const labels = { c1: "Jeu 1/3", c2: "Jeu 2/3", c3: "Jeu 3/3", q: "Question bonus", end: "Résultats" };
     $("#hud-step").textContent = (labels[step] || "") + (CARD_LABEL[step] ? ` · Partie ${part + 1}/${PARTIES}` : "");
     if (CARD_LABEL[step]) {
       $(`#screen-${step} .card-num`).textContent = `${CARD_LABEL[step]} · Partie ${part + 1}/${PARTIES}`;
@@ -310,6 +310,17 @@
     buzz(kind ? [60, 40, 120] : 80);
     renderGarage();
   }
+
+  // Pièces d'or décoratives autour de chaque ticket
+  const COINS = [[-3, 4, 34], [88, 2, 30], [93, 22, 24], [-4, 30, 22], [91, 48, 28], [-5, 60, 30], [94, 74, 22], [-2, 88, 26], [86, 92, 32], [40, -2, 20]];
+  document.querySelectorAll(".ticket-in").forEach((t) => {
+    COINS.forEach(([l, tp, sz], i) => {
+      const c = document.createElement("i");
+      c.className = "coin";
+      c.style.cssText = `left:${l}%;top:${tp}%;width:${sz}px;height:${sz}px;transform:rotate(${i * 37}deg)`;
+      t.prepend(c);
+    });
+  });
 
   // ------------------------------------------------------------------
   //  Accueil + feux de départ
@@ -585,7 +596,7 @@
     } else {
       prizes = C.f1.map((car, i) => {
         if (!won[i]) return "";
-        const how = cardWon(CARDS[i]) ? `Gagnée sur la carte ${i + 1}` : "Débloquée grâce au muscle";
+        const how = cardWon(CARDS[i]) ? `Gagnée au jeu ${i + 1}` : "Débloquée grâce au muscle";
         return `<div class="prize-card" style="--c:${car.couleur}">${car.image ? "" : `<span class="ico">${CAR}</span>`}
           <div><b>${car.nom}</b><small>${car.equipe} · ${how}</small></div>
           ${car.image ? `<img src="${car.image}" alt="">` : ""}</div>`;
@@ -607,13 +618,13 @@
   function confetti(count) {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) count = Math.round(count / 4);
     const W = cv.width, d = devicePixelRatio;
-    const cols = ["#e10600", "#ffd23f", "#ffffff", "#22c55e", "#3671c6", "#ff8000"];
+    const cols = ["#ff2d6f", "#ffd23f", "#ffffff", "#22c55e", "#3aa0ff", "#b14dff"];
     for (let i = 0; i < count; i++) {
       parts.push({
         x: W / 2 + (Math.random() - 0.5) * W * 0.3, y: cv.height * 0.35,
         vx: (Math.random() - 0.5) * 18 * d, vy: (-Math.random() * 18 - 6) * d,
         s: (6 + Math.random() * 8) * d, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3,
-        c: pick(cols), flag: Math.random() < 0.15, life: 0,
+        c: pick(cols), flag: Math.random() < 0.3, life: 0,
       });
     }
     if (!anim) { anim = true; requestAnimationFrame(tick); }
@@ -626,12 +637,11 @@
       p.life++; p.vy += 0.45 * d; p.vx *= 0.99; p.vy *= 0.99;
       p.x += p.vx; p.y += p.vy; p.r += p.vr;
       cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r);
-      if (p.flag) {
-        const q = p.s / 2;
-        for (let a = 0; a < 3; a++) for (let b = 0; b < 2; b++) {
-          cx.fillStyle = (a + b) % 2 ? "#111" : "#fff";
-          cx.fillRect(-p.s * 0.75 + a * q, -q + b * q, q, q);
-        }
+      if (p.flag) { // pièce d'or
+        const sx = Math.abs(Math.cos(p.r));
+        cx.scale(Math.max(0.15, sx), 1);
+        cx.fillStyle = "#c98a00"; cx.beginPath(); cx.arc(0, 0, p.s * 0.6, 0, 7); cx.fill();
+        cx.fillStyle = "#ffd84a"; cx.beginPath(); cx.arc(0, 0, p.s * 0.45, 0, 7); cx.fill();
       } else {
         cx.fillStyle = p.c;
         cx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2 * Math.abs(Math.cos(p.r * 2)) + d);

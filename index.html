@@ -3,89 +3,95 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0b12">
-  <title>Grand Prix d'anniversaire</title>
+  <meta name="theme-color" content="#2a0410">
+  <title>Casino d'anniversaire</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="checker-top"></div>
+  <div class="marquee"></div>
 
   <header class="hud" id="hud" hidden>
-    <div class="hud-step" id="hud-step">Course 1/3</div>
+    <div class="hud-step" id="hud-step">Jeu 1/3</div>
     <div class="garage" id="garage" aria-label="F1 gagnées"></div>
   </header>
 
   <main id="app">
     <!-- Accueil -->
     <section class="screen" id="screen-intro">
-      <div class="lights" id="lights">
-        <span></span><span></span><span></span><span></span><span></span>
+      <div class="sign">
+        <div class="lights" id="lights">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <p class="kicker" id="intro-date"></p>
+        <h1 class="title"><span class="t3d gold">Casino</span><span class="t3d white small">d'anniversaire</span></h1>
+        <p class="pilot">Joueur : <strong id="intro-name"></strong></p>
       </div>
-      <p class="kicker" id="intro-date"></p>
-      <h1 class="title">Grand Prix<br>d'anniversaire</h1>
-      <p class="pilot">Pilote : <strong id="intro-name"></strong></p>
       <p class="lead" id="intro-text"></p>
-      <button class="btn" id="btn-start">Feu vert !</button>
+      <button class="btn" id="btn-start">Jouer !</button>
     </section>
 
-    <!-- Carte 1 : grille de départ -->
+    <!-- Carte 1 : grille -->
     <section class="screen" id="screen-c1" hidden>
-      <div class="card card-grid">
-        <div class="card-head">
-          <span class="card-num">Carte 1</span>
-          <h2>Grille de départ</h2>
-          <p>Gratte les 9 cases. <strong>3 symboles identiques</strong> = tu gagnes une F1.</p>
+      <div class="ticket t-blue">
+        <div class="ticket-in">
+          <span class="card-num">Jeu 1</span>
+          <h2 class="t-title"><span class="t3d green">Grille</span><span class="t3d white">d'Or</span></h2>
+          <span class="sticker">Grattez vite !</span>
+          <div class="grid9" id="grid9"></div>
+          <p class="t-rules">Si tu découvres 3 symboles identiques, tu remportes ce gain : <b>1 F1 Lego</b></p>
           <div class="odds" id="odds-c1"></div>
+          <div class="t-foot"><span class="nul">Nul si découvert</span><span class="barcode">GRL</span></div>
         </div>
-        <div class="grid9" id="grid9"></div>
       </div>
       <div class="result" id="res-c1" hidden></div>
     </section>
 
     <!-- Carte 2 : jackpot -->
     <section class="screen" id="screen-c2" hidden>
-      <div class="card card-jackpot">
-        <div class="card-head">
-          <span class="card-num">Carte 2</span>
-          <h2>Jackpot du paddock</h2>
-          <p>Tire le levier pour arrêter les rouleaux. <strong>3 logos identiques</strong> = une F1. Et 3 chats = le cadeau légendaire...</p>
-          <div class="odds" id="odds-c2"></div>
-        </div>
-        <div class="slot-wrap">
-          <div class="slot" id="slot">
-            <div class="reel"><div class="strip"></div></div>
-            <div class="reel"><div class="strip"></div></div>
-            <div class="reel"><div class="strip"></div></div>
-            <div class="payline"></div>
+      <div class="ticket t-pink">
+        <div class="ticket-in">
+          <span class="card-num">Jeu 2</span>
+          <h2 class="t-title"><span class="t3d script">Mega</span><span class="t3d white">Jackpot</span></h2>
+          <div class="slot-wrap">
+            <div class="slot-frame">
+              <div class="slot" id="slot">
+                <div class="reel"><div class="strip"></div></div>
+                <div class="reel"><div class="strip"></div></div>
+                <div class="reel"><div class="strip"></div></div>
+                <div class="payline"></div>
+              </div>
+            </div>
+            <button class="lever" id="lever" aria-label="Tirer le levier">
+              <span class="lever-arm"><span class="lever-ball"></span></span>
+              <span class="lever-base"></span>
+            </button>
           </div>
-          <button class="lever" id="lever" aria-label="Tirer le levier">
-            <span class="lever-arm"><span class="lever-ball"></span></span>
-            <span class="lever-base"></span>
-          </button>
+          <p class="hint" id="slot-hint">Les rouleaux tournent... tire le levier !</p>
+          <span class="sticker right">Tire vite !</span>
+          <p class="t-rules">Si tu alignes 3 symboles identiques, tu remportes ce gain : <b>1 F1 Lego</b>. Et 3 chats = le cadeau légendaire...</p>
+          <div class="odds" id="odds-c2"></div>
+          <div class="t-foot"><span class="nul">Nul si découvert</span><span class="barcode">JKP</span></div>
         </div>
-        <p class="hint" id="slot-hint">Les rouleaux tournent... tire le levier !</p>
       </div>
       <div class="result" id="res-c2" hidden></div>
     </section>
 
     <!-- Carte 3 : goal -->
     <section class="screen" id="screen-c3" hidden>
-      <div class="card card-goal">
-        <div class="stadium">
-          <span class="card-num">Carte 3</span>
-          <div class="goal-title">GOAL<span>!</span></div>
+      <div class="ticket t-green">
+        <div class="ticket-in stadium">
+          <span class="card-num">Jeu 3</span>
+          <h2 class="t-title"><span class="t3d yellow">Goal!</span></h2>
           <div class="goal-sub">Gagne jusqu'à <strong>1 F1 Lego</strong></div>
-          <div class="odds" id="odds-c3"></div>
           <div class="ball-field" id="balls">
-            <div class="gain-label">GAIN</div>
+            <div class="gain-label t3d white">Gain</div>
             <div class="gain-box" id="goal-prize"></div>
           </div>
-        </div>
-        <div class="goal-rules">
-          Gratte les 5 ballons. Si tu retrouves le symbole de la case <strong>GAIN</strong>, tu remportes la F1.
-          <span>NUL SI DÉCOUVERT</span>
+          <p class="t-rules">Gratte les 5 ballons. Si tu retrouves le symbole de la case <b>GAIN</b>, tu remportes la F1.</p>
+          <div class="odds" id="odds-c3"></div>
+          <div class="t-foot"><span class="nul">Nul si découvert</span><span class="barcode">GOL</span></div>
         </div>
       </div>
       <div class="result" id="res-c3" hidden></div>
@@ -93,12 +99,11 @@
 
     <!-- Question finale -->
     <section class="screen" id="screen-q" hidden>
-      <div class="card card-q">
-        <div class="card-head">
+      <div class="ticket t-purple card-q">
+        <div class="ticket-in">
           <span class="card-num">Question bonus</span>
-          <h2>Le rattrapage du championnat</h2>
-          <p id="q-intro"></p>
-        </div>
+          <h2 class="t-title"><span class="t3d gold">Quitte</span><span class="t3d white">ou double</span></h2>
+          <p class="t-rules" id="q-intro"></p>
         <p class="question" id="q-text"></p>
         <form id="q-form" autocomplete="off">
           <input id="q-input" type="text" placeholder="Ta réponse..." maxlength="80" required>
@@ -106,15 +111,16 @@
         </form>
         <p class="q-feedback" id="q-feedback" aria-live="polite"></p>
         <div class="q-tries" id="q-tries"></div>
+        </div>
       </div>
     </section>
 
     <!-- Écran final -->
     <section class="screen" id="screen-end" hidden>
       <div class="podium-head">
-        <div class="flag-wave"></div>
+        <div class="jackpot-sign">🏆</div>
         <p class="kicker">Classement final</p>
-        <h1 class="title small">Champion du monde<br>des anniversaires</h1>
+        <h1 class="title"><span class="t3d gold">Grand</span><span class="t3d white small">gagnant</span></h1>
       </div>
       <ol class="standings" id="standings"></ol>
       <div class="prizes" id="prizes"></div>
@@ -123,7 +129,7 @@
   </main>
 
   <canvas id="confetti"></canvas>
-  <div class="checker-bottom"></div>
+  <div class="marquee bottom"></div>
 
   <script src="config.js"></script>
   <script src="app.js"></script>
