@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b12">
+  <title>Grand Prix d'anniversaire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="checker-top"></div>
+
+  <header class="hud" id="hud" hidden>
+    <div class="hud-step" id="hud-step">Course 1/3</div>
+    <div class="garage" id="garage" aria-label="F1 gagnées"></div>
+  </header>
+
+  <main id="app">
+    <!-- Accueil -->
+    <section class="screen" id="screen-intro">
+      <div class="lights" id="lights">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p class="kicker" id="intro-date"></p>
+      <h1 class="title">Grand Prix<br>d'anniversaire</h1>
+      <p class="pilot">Pilote : <strong id="intro-name"></strong></p>
+      <p class="lead" id="intro-text"></p>
+      <button class="btn" id="btn-start">Feu vert !</button>
+    </section>
+
+    <!-- Carte 1 : grille de départ -->
+    <section class="screen" id="screen-c1" hidden>
+      <div class="card card-grid">
+        <div class="card-head">
+          <span class="card-num">Carte 1</span>
+          <h2>Grille de départ</h2>
+          <p>Gratte les 9 cases. <strong>3 symboles identiques</strong> = tu gagnes une F1.</p>
+        </div>
+        <div class="grid9" id="grid9"></div>
+      </div>
+      <div class="result" id="res-c1" hidden></div>
+    </section>
+
+    <!-- Carte 2 : jackpot -->
+    <section class="screen" id="screen-c2" hidden>
+      <div class="card card-jackpot">
+        <div class="card-head">
+          <span class="card-num">Carte 2</span>
+          <h2>Jackpot du paddock</h2>
+          <p>Tire le levier pour arrêter les rouleaux. <strong>3 logos identiques</strong> = une F1. Et il paraît qu'un cadeau légendaire se cache ici...</p>
+        </div>
+        <div class="slot-wrap">
+          <div class="slot" id="slot">
+            <div class="reel"><div class="strip"></div></div>
+            <div class="reel"><div class="strip"></div></div>
+            <div class="reel"><div class="strip"></div></div>
+            <div class="payline"></div>
+          </div>
+          <button class="lever" id="lever" aria-label="Tirer le levier">
+            <span class="lever-arm"><span class="lever-ball"></span></span>
+            <span class="lever-base"></span>
+          </button>
+        </div>
+        <p class="hint" id="slot-hint">Les rouleaux tournent... tire le levier !</p>
+      </div>
+      <div class="result" id="res-c2" hidden></div>
+    </section>
+
+    <!-- Carte 3 : goal -->
+    <section class="screen" id="screen-c3" hidden>
+      <div class="card card-goal">
+        <div class="card-head">
+          <span class="card-num">Carte 3</span>
+          <h2>Goal !</h2>
+          <p>Gratte le gain dans la cage puis les 5 ballons. <strong>Un ballon identique au gain</strong> = une F1.</p>
+        </div>
+        <div class="pitch">
+          <div class="goal-cage">
+            <div class="net"></div>
+            <div class="prize-slot" id="goal-prize"></div>
+            <span class="cage-label">Ton gain</span>
+          </div>
+          <div class="balls" id="balls"></div>
+        </div>
+      </div>
+      <div class="result" id="res-c3" hidden></div>
+    </section>
+
+    <!-- Question finale -->
+    <section class="screen" id="screen-q" hidden>
+      <div class="card card-q">
+        <div class="card-head">
+          <span class="card-num">Question bonus</span>
+          <h2>Le rattrapage du championnat</h2>
+          <p id="q-intro"></p>
+        </div>
+        <p class="question" id="q-text"></p>
+        <form id="q-form" autocomplete="off">
+          <input id="q-input" type="text" placeholder="Ta réponse..." maxlength="80" required>
+          <button class="btn" type="submit">Valider</button>
+        </form>
+        <p class="q-feedback" id="q-feedback" aria-live="polite"></p>
+        <div class="q-tries" id="q-tries"></div>
+      </div>
+    </section>
+
+    <!-- Écran final -->
+    <section class="screen" id="screen-end" hidden>
+      <div class="podium-head">
+        <div class="flag-wave"></div>
+        <p class="kicker">Classement final</p>
+        <h1 class="title small">Champion du monde<br>des anniversaires</h1>
+      </div>
+      <ol class="standings" id="standings"></ol>
+      <div class="prizes" id="prizes"></div>
+      <p class="lead" id="end-text"></p>
+    </section>
+  </main>
+
+  <canvas id="confetti"></canvas>
+  <div class="checker-bottom"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

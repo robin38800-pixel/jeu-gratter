@@ -1,0 +1,55 @@
+// =====================================================================
+//  CONFIGURATION DU JEU — tout ce qui est personnalisable est ici.
+//  Modifie les textes entre guillemets, enregistre, c'est tout.
+// =====================================================================
+window.CONFIG = {
+  // Prénom du pilote (le héros du jour)
+  prenom: "Champion",
+
+  // Date affichée sur l'écran d'accueil (texte libre)
+  date: "Grand Prix du jour",
+
+  // Les 3 F1 Lego à gagner : une par carte (carte 1, carte 2, carte 3).
+  // "image" est facultatif : mets un chemin comme "images/ferrari.jpg".
+  f1: [
+    { nom: "F1 Lego n°1", equipe: "Écurie mystère", couleur: "#e10600", image: "" },
+    { nom: "F1 Lego n°2", equipe: "Écurie mystère", couleur: "#00a19c", image: "" },
+    { nom: "F1 Lego n°3", equipe: "Écurie mystère", couleur: "#ff8000", image: "" },
+  ],
+
+  // Le meilleur cadeau, caché dans la carte Jackpot
+  litiere: {
+    nom: "La litière pour chat connectée",
+    description: "Le summum de la technologie. Le chat te remercie déjà.",
+  },
+
+  // Probabilités (0.33 = 33 %)
+  chanceF1: 0.33,
+  chanceLitiere: 0.05, // uniquement sur la carte Jackpot
+
+  // Question finale si toutes les F1 n'ont pas été gagnées
+  question: "Quel est le muscle ?",
+  // Les 2 premières réponses sont TOUJOURS refusées avec ces messages
+  refus: [
+    "Faux. Même un pneu dur aurait trouvé. Deuxième tentative, pilote.",
+    "Toujours pas. La direction de course commence à rigoler. Dernière chance !",
+  ],
+  // La 3e réponse est TOUJOURS acceptée
+  bravo: "BONNE RÉPONSE ! (évidemment.) Toutes les F1 manquantes sont débloquées !",
+
+  // Petites blagues affichées pendant le jeu (remplace par vos blagues internes)
+  blagues: {
+    accueil: "Aujourd'hui, c'est toi le pilote. Trois cartes, trois F1 à gagner. Boucle ta ceinture.",
+    perdu: [
+      "Crevaison lente. Ça arrive aux meilleurs.",
+      "Stratégie pneus douteuse. Le muret des stands s'excuse.",
+      "Même Lance Stroll aurait fait mieux. (Non, c'est faux, mais quand même.)",
+    ],
+    gagne: [
+      "Victoire ! Champagne sur le podium !",
+      "Pole position et victoire. Masterclass.",
+      "Doublé historique ! Enfin, simple. Mais historique.",
+    ],
+    finale: "Joyeux anniversaire ! Que ton année soit aussi rapide qu'un tour de qualif.",
+  },
+};
