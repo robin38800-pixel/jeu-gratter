@@ -321,13 +321,13 @@
     if (!kind) maybeMarbella(id);
   }
 
-  // Pop-up « stage à Marbella » : 2 défaites de suite sur un même jeu (une fois par jeu)
+  // Pop-up « stage à Marbella » : 2 défaites de suite sur un même jeu (une seule fois sur toute la partie)
   const GAME_NAME = { c1: "Grille d'Or", c2: "Mega Jackpot", c3: "Goal!" };
   const isLoss = (v) => v === false || v === "perdu";
   function maybeMarbella(c) {
     const p = S.part, r = S.res[c];
     S.mb = S.mb || {};
-    if (S.mb[c] || p < 1 || !isLoss(r[p]) || !isLoss(r[p - 1]) || cardWon(c)) return;
+    if (Object.keys(S.mb).length || p < 1 || !isLoss(r[p]) || !isLoss(r[p - 1]) || cardWon(c)) return;
     S.mb[c] = true; save();
     const done = r.filter((v) => v !== undefined).length;
     setTimeout(() => {
