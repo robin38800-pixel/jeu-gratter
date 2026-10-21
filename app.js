@@ -310,7 +310,7 @@
       html = `<h3>Perdu...</h3><p>${lossJoke(id)}</p>`;
     }
     const [next, part] = nextOf(id);
-    const nextLabel = next === id ? `${PART_WORD[id]} ${part + 1}` : next === "c2" || next === "c3" ? "Carte suivante" : next === "q" ? "Question bonus" : "Voir le classement";
+    const nextLabel = next === id ? `${PART_WORD[id]} ${part + 1}` : next === "c2" || next === "c3" ? "Carte suivante" : next === "q" ? "Question bonus" : "Voir mes cadeaux";
     box.innerHTML = html + `<button class="btn">${nextLabel}</button>`;
     box.hidden = false;
     $("button", box).addEventListener("click", () => show(next, part));
@@ -621,7 +621,7 @@
       buzz([60, 40, 160]);
       const b = document.createElement("button");
       b.className = "btn";
-      b.textContent = "Voir le classement";
+      b.textContent = "Voir mes cadeaux";
       b.addEventListener("click", () => show("end"));
       fb.after(b);
     });
@@ -643,6 +643,12 @@
       }).filter(Boolean);
     }
     $("#gift-count").textContent = gifts.length > 1 ? `${gifts.length} cadeaux gagnés` : "1 cadeau gagné";
+    // Les 3 F1 gagnées directement au grattage : écran « Tu as tout gagné »
+    if (!litiere && won.every(Boolean) && !S.viaQ.length) {
+      $("#screen-end .kicker").textContent = "Sans faute !";
+      $("#screen-end .title").innerHTML = `<span class="t3d gold">Tu as tout</span><span class="t3d white small">gagné !</span>`;
+      $("#gift-count").textContent = "Les 3 F1 gagnées au grattage, sans même passer par la question !";
+    }
     $("#prizes").innerHTML = gifts.map((g, i) => `
       <div class="gift" style="--c:${g.c};animation-delay:${i * 0.2}s">
         <div class="gift-pic">${g.img ? `<img src="${g.img}" alt="">` : `<span>${g.ico || CAR}</span>`}</div>
