@@ -279,6 +279,13 @@
     return [wonF1().every(Boolean) ? "end" : "q", 0];
   }
 
+  // Une blague de défaite différente par partie (7 au total, dans l'ordre des parties)
+  function lossJoke(c) {
+    const idx = CARDS.slice(0, CARDS.indexOf(c)).reduce((n, k) => n + PARTIES[k], 0) + S.part;
+    const list = C.blagues.perdu;
+    return list[idx % list.length];
+  }
+
   function showResult(id, kind, already) {
     const box = $("#res-" + id);
     const i = CARDS.indexOf(id);
@@ -292,15 +299,15 @@
         <p>${C.litiere.description}</p>
         <p style="margin-top:10px"><em>Règlement de course : la litière remplace toutes les F1. Le chat a gagné, pas toi.</em></p>`;
     } else if (kind && already) {
-      html = `<h3>Encore gagné !</h3><p>Mais ta ${car.nom} est déjà dans ton garage. Une seule par écurie, règlement FIA.</p>`;
+      html = `<h3>Encore gagné !</h3><p>Mais ta ${car.nom} est déjà dans ton garage.</p>`;
     } else if (kind) {
-      html = `<h3>Victoire !</h3><p>${pick(C.blagues.gagne)}</p>
+      html = `<h3>Victoire !</h3>
         <p class="prize-name">${car.nom}</p><p>${car.equipe}</p>
         ${car.image ? `<img src="${car.image}" alt="${car.nom}">` : ""}`;
     } else if (cardWon(id)) {
-      html = `<h3>Perdu...</h3><p>Pas grave, ta ${car.nom} est déjà dans ton garage.</p>`;
+      html = `<h3>Perdu...</h3><p>${lossJoke(id)}</p><p style="margin-top:8px">Pas grave, ta ${car.nom} est déjà dans ton garage.</p>`;
     } else {
-      html = `<h3>Perdu...</h3><p>${pick(C.blagues.perdu)}</p>`;
+      html = `<h3>Perdu...</h3><p>${lossJoke(id)}</p>`;
     }
     const [next, part] = nextOf(id);
     const nextLabel = next === id ? `${PART_WORD[id]} ${part + 1}` : next === "c2" || next === "c3" ? "Carte suivante" : next === "q" ? "Question bonus" : "Voir le classement";
@@ -330,7 +337,7 @@
           <span class="card-num">${GAME_NAME[c]} · 0/${done}</span>
           <h2 class="t-title"><span class="t3d yellow">Aïe aïe aïe</span></h2>
           <div class="mb-scene">${MARBELLA_SVG}</div>
-          <p class="mb-msg">Tu es mauvais…<b>Il te faudrait un stage à Marbella !</b></p>
+          <p class="mb-msg">Tu es mauvais…<b>Il te faudrait un stage à Marbella !</b><small>Là-bas, au moins, personne ne te demandera de battre le PSG.</small></p>
           <button class="btn">J'ai compris, je continue</button>
         </div></div></div>`);
       buzz([100, 60, 100]);

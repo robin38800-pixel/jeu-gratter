@@ -398,3 +398,4 @@ main { max-width: 460px; margin: 0 auto; padding: 16px 16px 48px; }
 .mb-msg { color: #fff; font-weight: 900; font-size: 22px; line-height: 1.2; margin: 0; text-shadow: 0 2px 0 rgba(0,0,0,.3); }
 .mb-msg b { color: #fff36b; font-family: "Luckiest Guy"; font-weight: 400; font-size: 30px; letter-spacing: .02em; display: block; margin-top: 4px; text-transform: uppercase; }
 .mb-pop .btn { margin-top: 14px; font-size: 21px; }
+.mb-msg small { display: block; margin-top: 8px; font-size: 15px; font-weight: 800; color: #fff; opacity: .92; }

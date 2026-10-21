@@ -37,18 +37,18 @@ window.CONFIG = {
   // La 3e réponse est TOUJOURS acceptée
   bravo: "BONNE RÉPONSE ! (évidemment.) Toutes les F1 manquantes sont débloquées !",
 
-  // Petites blagues affichées pendant le jeu (remplace par vos blagues internes)
+  // Textes et blagues (OM) affichés pendant le jeu
   blagues: {
-    accueil: "Bienvenue au casino, Nathan ! Trois jeux, deux parties chacun et trois tirages au jackpot. Faites vos jeux !",
+    accueil: "Bienvenue au casino, Nathan ! Ici, comme à l'OM, on promet beaucoup et on paie rarement. Faites vos jeux !",
+    // Une blague par partie perdue, dans l'ordre : Grille 1-2, Jackpot 1-3, Goal 1-2
     perdu: [
-      "Crevaison lente. Ça arrive aux meilleurs.",
-      "Stratégie pneus douteuse. Le muret des stands s'excuse.",
-      "Même Lance Stroll aurait fait mieux. (Non, c'est faux, mais quand même.)",
-    ],
-    gagne: [
-      "Victoire ! Champagne sur le podium !",
-      "Pole position et victoire. Masterclass.",
-      "Doublé historique ! Enfin, simple. Mais historique.",
+      "Perdu. Bienvenue à l'OM : beaucoup d'espoir en août, la déprime en novembre.",
+      "Perdu. Ton espoir vient de mourir, comme chaque année au Vélodrome vers la 85e minute.",
+      "Perdu… Rassure-toi, l'OM aussi perd ses finales. C'est même sa spécialité.",
+      "Raté. Même le Vélodrome te siffle, et pourtant il en a vu d'autres.",
+      "Perdu. À ce rythme, l'OM va te proposer le poste d'entraîneur. Pour trois mois, comme d'habitude.",
+      "Défaite. Le Mistral a soufflé plus fort que toi.",
+      "Perdu. Même la Bonne Mère a détourné le regard.",
     ],
     finale: "Joyeux anniversaire Nathan ! Que ton année soit aussi rapide qu'un tour de qualif.",
   },
