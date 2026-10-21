@@ -39,7 +39,7 @@ window.CONFIG = {
 
   // Petites blagues affichées pendant le jeu (remplace par vos blagues internes)
   blagues: {
-    accueil: "Aujourd'hui, c'est toi le pilote. Trois cartes, trois F1 à gagner. Boucle ta ceinture.",
+    accueil: "Aujourd'hui, c'est toi le pilote. Trois jeux à gratter, deux parties chacun. Boucle ta ceinture.",
     perdu: [
       "Crevaison lente. Ça arrive aux meilleurs.",
       "Stratégie pneus douteuse. Le muret des stands s'excuse.",

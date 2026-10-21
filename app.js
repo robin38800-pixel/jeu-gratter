@@ -21,7 +21,7 @@
   // ------------------------------------------------------------------
   //  État (tirage fait une seule fois, gardé si la page est rechargée)
   // ------------------------------------------------------------------
-  const KEY = "gp-anniv-v1";
+  const KEY = "gp-anniv-v2";
   const store = {
     get() { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } },
     set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} },
@@ -32,38 +32,52 @@
     history.replaceState(null, "", location.pathname);
   }
 
-  function draw() {
-    const c1 = Math.random() < C.chanceF1;
-    const r = Math.random();
-    const c2 = r < C.chanceLitiere ? "litiere" : r < C.chanceLitiere + C.chanceF1 ? "f1" : "perdu";
-    const c3 = Math.random() < C.chanceF1;
+  const CARDS = ["c1", "c2", "c3"];
+  const PARTIES = 2;
 
-    // Carte 1 : 9 cases. Gagné = 3 voitures ; perdu = aucun symbole 3 fois.
-    const others = SYMBOLS.filter((s) => s !== CAR);
-    let grid;
-    if (c1) grid = shuffle([CAR, CAR, CAR, ...shuffle(others.flatMap((s) => [s, s])).slice(0, 6)]);
-    else grid = shuffle(shuffle(SYMBOLS.flatMap((s) => [s, s])).slice(0, 9));
-
-    // Carte 2 : rouleaux. Perdu = presque gagné (2 identiques, 1 différent)
-    let reels;
-    if (c2 === "litiere") reels = [CAT, CAT, CAT];
-    else if (c2 === "f1") reels = [CAR, CAR, CAR];
-    else {
-      const a = pick(REEL_SYMBOLS);
-      const b = pick(REEL_SYMBOLS.filter((s) => s !== a));
-      reels = shuffle([a, a, b]);
+  function drawPartie(card) {
+    const others = SYMBOLS.filter((x) => x !== CAR);
+    if (card === "c1") {
+      // 9 cases. Gagné = 3 voitures ; perdu = aucun symbole 3 fois.
+      const win = Math.random() < C.chanceF1;
+      const grid = win
+        ? shuffle([CAR, CAR, CAR, ...shuffle(others.flatMap((x) => [x, x])).slice(0, 6)])
+        : shuffle(shuffle(SYMBOLS.flatMap((x) => [x, x])).slice(0, 9));
+      return { out: win, lay: grid };
     }
+    if (card === "c2") {
+      // Rouleaux. Perdu = presque gagné (2 identiques, 1 différent)
+      const r = Math.random();
+      const out = r < C.chanceLitiere ? "litiere" : r < C.chanceLitiere + C.chanceF1 ? "f1" : "perdu";
+      let reels;
+      if (out === "litiere") reels = [CAT, CAT, CAT];
+      else if (out === "f1") reels = [CAR, CAR, CAR];
+      else {
+        const a = pick(REEL_SYMBOLS);
+        const b = pick(REEL_SYMBOLS.filter((x) => x !== a));
+        reels = shuffle([a, a, b]);
+      }
+      return { out, lay: reels };
+    }
+    // Goal : le gain est la F1 ; un ballon identique = gagné
+    const win = Math.random() < C.chanceF1;
+    const balls = shuffle(others.concat(["⚽", "🧤"])).slice(0, win ? 4 : 5);
+    if (win) balls.splice(Math.floor(Math.random() * 5), 0, CAR);
+    return { out: win, lay: balls };
+  }
 
-    // Carte 3 : le gain dans la cage est la F1 ; un ballon identique = gagné
-    const ballPool = SYMBOLS.filter((s) => s !== CAR).concat(["⚽", "🧤"]);
-    const balls = shuffle(ballPool).slice(0, c3 ? 4 : 5);
-    if (c3) balls.splice(Math.floor(Math.random() * 5), 0, CAR);
-
-    return { step: "intro", out: { c1, c2, c3 }, lay: { grid, reels, balls }, res: {}, q: 0, viaQ: [] };
+  function draw() {
+    const S = { step: "intro", part: 0, out: {}, lay: {}, res: { c1: [], c2: [], c3: [] }, q: 0, viaQ: [] };
+    CARDS.forEach((c) => {
+      const ps = Array.from({ length: PARTIES }, () => drawPartie(c));
+      S.out[c] = ps.map((x) => x.out);
+      S.lay[c] = ps.map((x) => x.lay);
+    });
+    return S;
   }
 
   let S = store.get();
-  if (!S || !S.out) { S = draw(); store.set(S); }
+  if (!S || !S.out || !Array.isArray(S.out.c1)) { S = draw(); store.set(S); }
   const save = () => store.set(S);
 
   // ------------------------------------------------------------------
@@ -171,9 +185,15 @@
       if (!silent && onReveal) onReveal();
     }
 
+    // iOS : bloquer le défilement de la page quand le doigt est sur la zone
+    const stop = (e) => { if (!revealed) e.preventDefault(); };
+    cv.addEventListener("touchstart", stop, { passive: false });
+    cv.addEventListener("touchmove", stop, { passive: false });
+
     cv.addEventListener("pointerdown", (e) => {
       if (revealed) return;
       drawing = true; last = null;
+      document.documentElement.classList.add("scratching");
       try { cv.setPointerCapture(e.pointerId); } catch (_) {}
       scratchTo(pos(e));
       e.preventDefault();
@@ -184,7 +204,10 @@
       (evs.length ? evs : [e]).forEach((ev) => scratchTo(pos(ev)));
       e.preventDefault();
     });
-    const end = () => { if (drawing) { drawing = false; last = null; check(); } };
+    const end = () => {
+      document.documentElement.classList.remove("scratching");
+      if (drawing) { drawing = false; last = null; check(); }
+    };
     cv.addEventListener("pointerup", end);
     cv.addEventListener("pointercancel", end);
 
@@ -198,34 +221,40 @@
   //  Navigation + HUD
   // ------------------------------------------------------------------
   const STEPS = ["intro", "c1", "c2", "c3", "q", "end"];
-  function show(step) {
-    S.step = step; save();
+  const CARD_LABEL = { c1: "Carte 1", c2: "Carte 2", c3: "Carte 3" };
+  function show(step, part = 0) {
+    S.step = step; S.part = part; save();
     STEPS.forEach((s) => { $("#screen-" + s).hidden = s !== step; });
     $("#hud").hidden = step === "intro";
     const labels = { c1: "Course 1/3", c2: "Course 2/3", c3: "Course 3/3", q: "Question bonus", end: "Arrivée" };
-    $("#hud-step").textContent = labels[step] || "";
+    $("#hud-step").textContent = (labels[step] || "") + (CARD_LABEL[step] ? ` · Partie ${part + 1}/${PARTIES}` : "");
+    if (CARD_LABEL[step]) {
+      $(`#screen-${step} .card-num`).textContent = `${CARD_LABEL[step]} · Partie ${part + 1}/${PARTIES}`;
+      $("#res-" + step).hidden = true;
+    }
     renderGarage();
     window.scrollTo({ top: 0, behavior: "smooth" });
     ({ c1: initC1, c2: initC2, c3: initC3, q: initQ, end: initEnd }[step] || (() => {}))();
   }
 
+  const hasLitiere = () => S.res.c2.includes("litiere");
+  const cardWon = (c) => (c === "c2" ? S.res.c2.includes("f1") : S.res[c].includes(true));
+
   function wonF1() {
-    if (S.res.c2 === "litiere") return [false, false, false];
-    return [S.res.c1 === true || S.viaQ.includes(0), S.res.c2 === "f1" || S.viaQ.includes(1), S.res.c3 === true || S.viaQ.includes(2)];
+    if (hasLitiere()) return [false, false, false];
+    return CARDS.map((c, i) => cardWon(c) || S.viaQ.includes(i));
   }
 
   function renderGarage() {
     const g = $("#garage");
     g.innerHTML = "";
-    const won = wonF1();
-    const keys = ["c1", "c2", "c3"];
-    if (S.res.c2 === "litiere") {
+    if (hasLitiere()) {
       g.innerHTML = `<div class="slot-car won" style="width:auto;padding:0 8px">${CAT} Litière !</div>`;
       return;
     }
-    won.forEach((w, i) => {
+    wonF1().forEach((w, i) => {
       const d = document.createElement("div");
-      const done = S.res[keys[i]] !== undefined;
+      const done = S.res[CARDS[i]].length === PARTIES;
       d.className = "slot-car" + (w ? " won" : done ? " lost" : "");
       d.textContent = w ? CAR : "";
       if (w) d.style.borderColor = C.f1[i].couleur;
@@ -233,9 +262,24 @@
     });
   }
 
-  function showResult(id, kind, next) {
+  // Enregistre le résultat de la partie en cours et renvoie l'étape suivante
+  function record(c, value) {
+    const p = S.part;
+    const before = cardWon(c);
+    if (S.res[c][p] === undefined) { S.res[c][p] = value; save(); }
+    return { already: before && p > 0 && S.res[c].slice(0, p).some((v) => v === true || v === "f1") };
+  }
+  function nextOf(c) {
+    if (hasLitiere()) return ["end", 0];
+    if (S.part + 1 < PARTIES) return [c, S.part + 1];
+    if (c === "c1") return ["c2", 0];
+    if (c === "c2") return ["c3", 0];
+    return [wonF1().every(Boolean) ? "end" : "q", 0];
+  }
+
+  function showResult(id, kind, already) {
     const box = $("#res-" + id);
-    const i = { c1: 0, c2: 1, c3: 2 }[id];
+    const i = CARDS.indexOf(id);
     const car = C.f1[i];
     box.className = "result " + (kind === "litiere" ? "mega" : kind ? "win" : "");
     let html;
@@ -245,24 +289,27 @@
         <p class="prize-name">${C.litiere.nom}</p>
         <p>${C.litiere.description}</p>
         <p style="margin-top:10px"><em>Règlement de course : la litière remplace toutes les F1. Le chat a gagné, pas toi.</em></p>`;
+    } else if (kind && already) {
+      html = `<h3>Encore gagné !</h3><p>Mais ta ${car.nom} est déjà dans ton garage. Une seule par écurie, règlement FIA.</p>`;
     } else if (kind) {
       html = `<h3>Victoire !</h3><p>${pick(C.blagues.gagne)}</p>
         <p class="prize-name">${car.nom}</p><p>${car.equipe}</p>
         ${car.image ? `<img src="${car.image}" alt="${car.nom}">` : ""}`;
+    } else if (cardWon(id)) {
+      html = `<h3>Perdu...</h3><p>Pas grave, ta ${car.nom} est déjà dans ton garage.</p>`;
     } else {
       html = `<h3>Perdu...</h3><p>${pick(C.blagues.perdu)}</p>`;
     }
-    const nextLabel = next === "c2" || next === "c3" ? "Carte suivante" : next === "q" ? "Question bonus" : "Voir le classement";
+    const [next, part] = nextOf(id);
+    const nextLabel = next === id ? `Partie ${part + 1}` : next === "c2" || next === "c3" ? "Carte suivante" : next === "q" ? "Question bonus" : "Voir le classement";
     box.innerHTML = html + `<button class="btn">${nextLabel}</button>`;
     box.hidden = false;
-    $("button", box).addEventListener("click", () => show(next));
+    $("button", box).addEventListener("click", () => show(next, part));
     setTimeout(() => box.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
-    if (kind) confetti(kind === "litiere" ? 400 : 180);
+    if (kind && !already) confetti(kind === "litiere" ? 400 : 180);
     buzz(kind ? [60, 40, 120] : 80);
     renderGarage();
   }
-
-  const afterC3 = () => (wonF1().every(Boolean) ? "end" : "q");
 
   // ------------------------------------------------------------------
   //  Accueil + feux de départ
@@ -270,13 +317,12 @@
   $("#intro-name").textContent = C.prenom;
   $("#intro-date").textContent = C.date;
   $("#intro-text").textContent = C.blagues.accueil;
-  $("#intro-cars").innerHTML = C.f1.map((c) => `<figure style="--c:${c.couleur}">${c.image ? `<img src="${c.image}" alt="">` : CAR}<figcaption>${c.nom}</figcaption></figure>`).join("");
 
   // Pourcentage de chance affiché sur chaque carte
   const pct = (x) => `${Math.round(x * 100)} %`;
-  $("#odds-c1").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b>`;
-  $("#odds-c2").innerHTML = `F1 : <b>${pct(C.chanceF1)}</b> · <span class="cat-logo">${CAT}</span> Litière : <b>${pct(C.chanceLitiere)}</b>`;
-  $("#odds-c3").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b>`;
+  $("#odds-c1").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b> par partie`;
+  $("#odds-c2").innerHTML = `Par partie : F1 <b>${pct(C.chanceF1)}</b> · <span class="cat-logo">${CAT}</span> Litière <b>${pct(C.chanceLitiere)}</b>`;
+  $("#odds-c3").innerHTML = `Chance de gagner : <b>${pct(C.chanceF1)}</b> par partie`;
   $("#btn-start").addEventListener("click", (e) => {
     const btn = e.currentTarget;
     btn.disabled = true;
@@ -299,10 +345,11 @@
   // ------------------------------------------------------------------
   function initC1() {
     const root = $("#grid9");
-    if (root.childElementCount) return;
-    const done = S.res.c1 !== undefined;
+    root.innerHTML = "";
+    const p = S.part;
+    const done = S.res.c1[p] !== undefined;
     let left = 9;
-    const cells = S.lay.grid.map((sym) => {
+    const cells = S.lay.c1[p].map((sym) => {
       const el = document.createElement("div");
       el.className = "scratch";
       el.innerHTML = `<div class="under">${sym}</div>`;
@@ -310,9 +357,9 @@
       return { el, sym };
     });
     const finish = () => {
-      if (S.res.c1 === undefined) { S.res.c1 = S.out.c1; save(); }
-      if (S.res.c1) cells.filter((c) => c.sym === CAR).forEach((c) => c.el.classList.add("match"));
-      showResult("c1", S.res.c1, "c2");
+      const { already } = record("c1", S.out.c1[p]);
+      if (S.res.c1[p]) cells.filter((c) => c.sym === CAR).forEach((c) => c.el.classList.add("match"));
+      showResult("c1", S.res.c1[p], already);
     };
     cells.forEach((c) => {
       c.s = makeScratch(c.el, { label: "?", threshold: 0.45, onReveal: () => { if (--left === 0) finish(); } });
@@ -323,13 +370,15 @@
   // ------------------------------------------------------------------
   //  Carte 2 : jackpot
   // ------------------------------------------------------------------
-  let c2Ready = false;
+  let c2Run = 0;
   function initC2() {
-    if (c2Ready) return;
-    c2Ready = true;
+    const run = ++c2Run;
+    const p = S.part;
+    const lay = S.lay.c2[p];
     const reels = [...document.querySelectorAll("#slot .reel")];
     const N = REEL_SYMBOLS.length;
     const state = reels.map((reel, i) => {
+      reel.classList.remove("win");
       const strip = $(".strip", reel);
       const seq = shuffle(REEL_SYMBOLS);
       strip.innerHTML = seq.concat(seq).map((s) => (s === CAT ? `<div><span class="cat-reel">${s}</span></div>` : `<div>${s}</div>`)).join("");
@@ -338,6 +387,7 @@
     const H = () => reels[0].offsetHeight;
     let lastT = performance.now();
     function frame(t) {
+      if (run !== c2Run) return;
       const dt = Math.min(50, t - lastT); lastT = t;
       const h = H(), loop = h * N;
       let running = false;
@@ -371,21 +421,23 @@
     });
 
     const lever = $("#lever");
-    const finish = async () => {
-      if (S.res.c2 === undefined) { S.res.c2 = S.out.c2; save(); }
-      const res = S.res.c2;
+    lever.disabled = false;
+    lever.classList.remove("pulled");
+    $("#slot-hint").textContent = "Les rouleaux tournent... tire le levier !";
+    const finish = () => {
+      const { already } = record("c2", S.out.c2[p]);
+      const res = S.res.c2[p];
       if (res !== "perdu") reels.forEach((r) => r.classList.add("win"));
       $("#slot-hint").textContent = res === "perdu" ? "Si près du but..." : res === "litiere" ? "TROIS CHATS ?!" : "Trois F1 !";
-      if (res === "litiere") showResult("c2", "litiere", "end");
-      else showResult("c2", res === "f1", "c3");
+      showResult("c2", res === "litiere" ? "litiere" : res === "f1", already);
     };
 
-    if (S.res.c2 !== undefined) {
+    if (S.res.c2[p] !== undefined) {
       lever.disabled = true;
       lever.classList.add("pulled");
       state.forEach((r, i) => {
         const h = H();
-        r.p = r.seq.indexOf(S.lay.reels[i]) * h;
+        r.p = r.seq.indexOf(lay[i]) * h;
         r.stopped = true;
         r.strip.style.transform = `translateY(${-r.p}px)`;
       });
@@ -393,7 +445,7 @@
       return;
     }
 
-    lever.addEventListener("click", async () => {
+    lever.onclick = async () => {
       if (lever.disabled) return;
       lever.disabled = true;
       lever.classList.add("pulled");
@@ -401,14 +453,14 @@
       setTimeout(() => lever.classList.remove("pulled"), 450);
       $("#slot-hint").textContent = "Ça ralentit...";
       // suspense en plus sur le dernier rouleau si les deux premiers sont identiques
-      const [a, b, c] = S.lay.reels;
+      const [a, b, c] = lay;
       await Promise.all([
         stopReel(state[0], a, 200),
         stopReel(state[1], b, 900),
         stopReel(state[2], c, a === b ? 2300 : 1600),
       ]);
       finish();
-    });
+    };
   }
 
   // ------------------------------------------------------------------
@@ -424,27 +476,29 @@
   ];
   function initC3() {
     const field = $("#balls");
-    if (field.querySelector(".scratch")) return;
-    const done = S.res.c3 !== undefined;
+    field.querySelectorAll(".ball").forEach((el) => el.remove());
+    $("#goal-prize").innerHTML = "";
+    const p = S.part;
+    const done = S.res.c3[p] !== undefined;
     const prizeEl = document.createElement("div");
     prizeEl.className = "scratch";
     prizeEl.innerHTML = `<div class="under">${CAR}</div>`;
     $("#goal-prize").appendChild(prizeEl);
     const items = [{ el: prizeEl, sym: CAR, tone: "silver", label: "GAIN" }];
-    S.lay.balls.forEach((sym, i) => {
+    S.lay.c3[p].forEach((sym, i) => {
       const el = document.createElement("div");
-      const p = BALL_POS[i];
+      const bp = BALL_POS[i];
       el.className = "scratch ball";
-      el.style.cssText = `left:${p.l}%;top:${p.t}%;width:${p.w}%`;
+      el.style.cssText = `left:${bp.l}%;top:${bp.t}%;width:${bp.w}%`;
       el.innerHTML = `<div class="under">${sym}</div>`;
       field.appendChild(el);
       items.push({ el, sym, tone: "ball" });
     });
     let left = items.length;
     const finish = () => {
-      if (S.res.c3 === undefined) { S.res.c3 = S.out.c3; save(); }
-      if (S.res.c3) items.filter((it) => it.sym === CAR).forEach((it) => it.el.classList.add("match"));
-      showResult("c3", S.res.c3, afterC3());
+      const { already } = record("c3", S.out.c3[p]);
+      if (S.res.c3[p]) items.filter((it) => it.sym === CAR).forEach((it) => it.el.classList.add("match"));
+      showResult("c3", S.res.c3[p], already);
     };
     items.forEach((it) => {
       it.s = makeScratch(it.el, { label: it.label, tone: it.tone, threshold: 0.45, onReveal: () => { if (--left === 0) finish(); } });
@@ -506,7 +560,7 @@
   // ------------------------------------------------------------------
   function initEnd() {
     const won = wonF1();
-    const litiere = S.res.c2 === "litiere";
+    const litiere = hasLitiere();
     const n = won.filter(Boolean).length;
     const rows = [
       { pos: "P1", who: C.prenom, sub: litiere ? "Champion du monde de la propreté féline" : `${n} F1 au garage`, pts: litiere ? 500 : 25 * 3 + 26, c: "#ffd23f", me: true },
@@ -524,7 +578,6 @@
         <span class="who">${r.who}<small>${r.sub}</small></span><span class="pts">${r.pts} pts</span>
       </li>`).join("");
 
-    const keys = ["c1", "c2", "c3"];
     let prizes;
     if (litiere) {
       prizes = `<div class="prize-card" style="--c:#c084fc"><span class="ico">${CAT}</span>
@@ -532,7 +585,7 @@
     } else {
       prizes = C.f1.map((car, i) => {
         if (!won[i]) return "";
-        const how = S.res[keys[i]] === true || S.res[keys[i]] === "f1" ? `Gagnée sur la carte ${i + 1}` : "Débloquée grâce au muscle";
+        const how = cardWon(CARDS[i]) ? `Gagnée sur la carte ${i + 1}` : "Débloquée grâce au muscle";
         return `<div class="prize-card" style="--c:${car.couleur}">${car.image ? "" : `<span class="ico">${CAR}</span>`}
           <div><b>${car.nom}</b><small>${car.equipe} · ${how}</small></div>
           ${car.image ? `<img src="${car.image}" alt="">` : ""}</div>`;
@@ -592,6 +645,6 @@
   // ------------------------------------------------------------------
   //  Démarrage (reprend là où il s'était arrêté)
   // ------------------------------------------------------------------
-  if (S.step && S.step !== "intro") show(S.step);
+  if (S.step && S.step !== "intro") show(S.step, S.part || 0);
   else { STEPS.forEach((s) => { $("#screen-" + s).hidden = s !== "intro"; }); }
 })();

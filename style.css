@@ -12,7 +12,8 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { margin: 0; }
+html, body { margin: 0; overscroll-behavior: none; }
+html.scratching, html.scratching body { overflow: hidden; touch-action: none; }
 body {
   font-family: "Titillium Web", system-ui, sans-serif;
   background: radial-gradient(1200px 600px at 50% -10%, #2a0a0a 0%, var(--bg) 60%) fixed, var(--bg);
