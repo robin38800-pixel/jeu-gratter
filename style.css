@@ -177,39 +177,60 @@ main {
 @keyframes glow { 50% { box-shadow: 0 0 26px #ff2a2a; } }
 .hint { text-align: center; color: var(--muted); margin: 14px 0 0; min-height: 1.4em; }
 
-/* Carte 3 */
-.card-goal { background: linear-gradient(170deg, #0f3d1f, #0b2a16 60%, #1c1c27); }
-.pitch {
-  border-radius: 14px; padding: 14px 8px 18px;
-  background: repeating-linear-gradient(90deg, #1f7a3a 0 28px, #1a6c33 28px 56px);
-  border: 2px solid #ffffffaa;
-}
-.goal-cage {
-  position: relative; margin: 0 auto 18px; width: 78%; height: 110px;
-  border: 6px solid #fff; border-bottom: 0; border-radius: 6px 6px 0 0;
-  display: grid; place-items: center;
-}
-.net {
-  position: absolute; inset: 0;
+/* Carte 3 (inspirée de la carte Goal) */
+.card-goal { padding: 0; background: #0d3b1c; }
+.card-goal::before { z-index: 2; }
+.stadium {
+  position: relative; text-align: center; padding: 14px 12px 12px;
   background:
-    repeating-linear-gradient(45deg, #ffffff40 0 1px, transparent 1px 12px),
-    repeating-linear-gradient(-45deg, #ffffff40 0 1px, transparent 1px 12px);
+    radial-gradient(60px 30px at 12% 8%, #ffffffaa, transparent 70%),
+    radial-gradient(60px 30px at 88% 8%, #ffffffaa, transparent 70%),
+    linear-gradient(#0b1f5c 0%, #1d3f99 22%, #25306b 34%, #4a2f5a 40%, #1f7a3a 44%) top / 100% 100% no-repeat,
+    repeating-linear-gradient(90deg, #1f7a3a 0 30px, #1a6c33 30px 60px);
 }
-.prize-slot { position: relative; width: 96px; height: 72px; z-index: 1; }
-.prize-slot .scratch { width: 100%; height: 100%; border-radius: 12px; background: #fff8e7; box-shadow: 0 0 0 3px var(--gold); }
-.prize-slot .under { font-size: 44px; }
-.cage-label {
-  position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%);
-  font-size: 12px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: #fff;
-  background: var(--red); padding: 1px 10px; border-radius: 99px; white-space: nowrap;
+.stadium::after { /* tribunes */
+  content: ""; position: absolute; left: 0; right: 0; top: 33%; height: 9%;
+  background: repeating-linear-gradient(90deg, #ffffff22 0 3px, transparent 3px 7px), linear-gradient(#5b3c6e, #2d5d3c);
+  pointer-events: none;
 }
-.balls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 26px; }
-.balls .scratch {
-  width: 74px; height: 74px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #ddd 70%, #999);
+.goal-title {
+  position: relative; z-index: 1;
+  font-weight: 900; font-style: italic; font-size: 64px; line-height: .9; margin-top: 6px; letter-spacing: -.02em;
+  color: #ffe14d; -webkit-text-stroke: 2px #1a1a1a;
+  text-shadow: 0 4px 0 #b8860b, 0 6px 0 #1a1a1a, 0 10px 18px #000a;
+  transform: rotate(-4deg);
 }
-.balls .under { font-size: 36px; }
-.balls .scratch.match, .prize-slot .scratch.match { animation: pulse 1s ease infinite; box-shadow: 0 0 0 4px var(--gold), 0 0 20px var(--gold); }
+.goal-title span { color: #fff; }
+.goal-sub {
+  position: relative; z-index: 1; display: inline-block; margin: 10px 0 0;
+  font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 16px; color: #fff;
+  background: #111c; padding: 2px 12px; border-radius: 6px; transform: rotate(-2deg);
+}
+.goal-sub strong { color: #ffe14d; }
+.ball-field { position: relative; z-index: 1; width: 100%; aspect-ratio: 1 / .9; margin-top: 18px; }
+.ball-field .ball { position: absolute; aspect-ratio: 1; border-radius: 50%; box-shadow: 0 8px 14px #0008; }
+.ball-field .ball .under {
+  border-radius: 50%; font-size: clamp(30px, 10vw, 46px);
+  background: radial-gradient(circle at 35% 30%, #fff, #e8e8e8 65%, #a9a9a9);
+}
+.gain-label {
+  position: absolute; right: 4%; bottom: 36%; width: 32%; text-align: center;
+  font-weight: 900; font-size: 30px; color: #fff; text-shadow: 0 3px 0 #000, 0 0 12px #000;
+}
+.gain-box { position: absolute; right: 3%; bottom: 4%; width: 34%; height: 30%; }
+.gain-box .scratch { width: 100%; height: 100%; border-radius: 10px; box-shadow: 0 0 0 3px #fff, 0 8px 14px #0008; }
+.gain-box .under {
+  font-size: clamp(32px, 10vw, 46px); border-radius: 10px;
+  background:
+    repeating-linear-gradient(45deg, #0002 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(-45deg, #0002 0 1px, transparent 1px 10px), #fff8e7;
+}
+.ball-field .scratch.match { animation: pulse 1s ease infinite; box-shadow: 0 0 0 4px var(--gold), 0 0 22px var(--gold); }
+.goal-rules {
+  background: #138a3c; color: #fff; text-align: center; font-weight: 700; font-size: 15px; line-height: 1.3;
+  padding: 10px 14px 12px; border-top: 3px solid #fff;
+}
+.goal-rules span { display: block; margin-top: 4px; font-weight: 900; font-size: 18px; letter-spacing: .04em; }
 
 /* ---------- Résultat ---------- */
 .result {

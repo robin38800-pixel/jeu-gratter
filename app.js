@@ -87,6 +87,7 @@
         : ["#8e8e9a", "#e6e6ee", "#a5a5b2", "#f4f4f8", "#7d7d89"];
       cols.forEach((c, i) => g.addColorStop(i / (cols.length - 1), c));
       ctx.globalCompositeOperation = "source-over";
+      if (tone === "ball") { paintBall(); return; }
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
       // grain métallique
@@ -102,6 +103,43 @@
         ctx.textBaseline = "middle";
         ctx.fillText(label, w / 2, h / 2);
       }
+    }
+
+    function paintBall() {
+      const r = w / 2;
+      const g = ctx.createRadialGradient(r * 0.7, r * 0.6, r * 0.1, r, r, r);
+      g.addColorStop(0, "#ffffff"); g.addColorStop(0.7, "#e9e9e9"); g.addColorStop(1, "#9a9a9a");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+      const penta = (cx, cy, rad, rot) => {
+        ctx.beginPath();
+        for (let k = 0; k < 5; k++) {
+          const a = rot + (k * 2 * Math.PI) / 5 - Math.PI / 2;
+          ctx[k ? "lineTo" : "moveTo"](cx + rad * Math.cos(a), cy + rad * Math.sin(a));
+        }
+        ctx.closePath();
+        ctx.fill();
+      };
+      const rot = Math.random() * Math.PI;
+      ctx.strokeStyle = "#555"; ctx.lineWidth = Math.max(1, r * 0.03);
+      for (let k = 0; k < 5; k++) {
+        const a = rot + (k * 2 * Math.PI) / 5 - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(r + r * 0.28 * Math.cos(a), r + r * 0.28 * Math.sin(a));
+        ctx.lineTo(r + r * 0.72 * Math.cos(a), r + r * 0.72 * Math.sin(a));
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#1b1b1b";
+      penta(r, r, r * 0.3, rot);
+      for (let k = 0; k < 5; k++) {
+        const a = rot + Math.PI / 5 + (k * 2 * Math.PI) / 5 - Math.PI / 2;
+        penta(r + r * 0.92 * Math.cos(a), r + r * 0.92 * Math.sin(a), r * 0.3, a + Math.PI / 2);
+      }
+      // reflet
+      const s = ctx.createRadialGradient(r * 0.6, r * 0.5, 0, r * 0.6, r * 0.5, r * 0.5);
+      s.addColorStop(0, "rgba(255,255,255,.55)"); s.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = s;
+      ctx.fillRect(0, 0, w, h);
     }
 
     function pos(e) {
@@ -369,21 +407,31 @@
   // ------------------------------------------------------------------
   //  Carte 3 : goal
   // ------------------------------------------------------------------
+  // Disposition des 5 ballons (en % de la zone), comme sur la vraie carte
+  const BALL_POS = [
+    { l: 2, t: 30, w: 30 },
+    { l: 33, t: 3, w: 26 },
+    { l: 64, t: 10, w: 25 },
+    { l: 34, t: 38, w: 30 },
+    { l: 8, t: 67, w: 28 },
+  ];
   function initC3() {
-    const ballsRoot = $("#balls");
-    if (ballsRoot.childElementCount) return;
+    const field = $("#balls");
+    if (field.querySelector(".scratch")) return;
     const done = S.res.c3 !== undefined;
     const prizeEl = document.createElement("div");
     prizeEl.className = "scratch";
     prizeEl.innerHTML = `<div class="under">${CAR}</div>`;
     $("#goal-prize").appendChild(prizeEl);
-    const items = [{ el: prizeEl, sym: CAR, tone: "gold", label: "GAIN" }];
-    S.lay.balls.forEach((sym) => {
+    const items = [{ el: prizeEl, sym: CAR, tone: "silver", label: "GAIN" }];
+    S.lay.balls.forEach((sym, i) => {
       const el = document.createElement("div");
-      el.className = "scratch";
+      const p = BALL_POS[i];
+      el.className = "scratch ball";
+      el.style.cssText = `left:${p.l}%;top:${p.t}%;width:${p.w}%`;
       el.innerHTML = `<div class="under">${sym}</div>`;
-      ballsRoot.appendChild(el);
-      items.push({ el, sym, tone: "silver", label: "⚽" });
+      field.appendChild(el);
+      items.push({ el, sym, tone: "ball" });
     });
     let left = items.length;
     const finish = () => {
